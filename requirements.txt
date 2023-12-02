@@ -1,0 +1,11 @@
+langchain
+openai
+pypdf
+chromadb
+tiktoken
+pysqlite3-binary
+streamlit_extras
+chardet
+PyPDF2
+openpyxl
+difflib
