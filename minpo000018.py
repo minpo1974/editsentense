@@ -8,7 +8,7 @@ import chardet
 import streamlit as st
 import PyPDF2
 import time
-from openai import OpenAI  # 수정된 부분
+import openai
 
 def load_model_list(filename):
     with open(filename, "r") as file:
@@ -35,20 +35,18 @@ def pdf_to_text(uploaded_file):
             text += page.extract_text() + "\n"
     return text
 
-def correct_text_with_gpt_full_text(text, model, api_key):
-    # 클라이언트를 여기에서 초기화합니다
-    client = OpenAI(api_key=api_key)  # 수정된 부분
+def correct_text_with_gpt_full_text(text, model):
     conversation_history = [
         {"role": "system", "content": "너는 이제 첨삭 전문가이다. 너는 언어학자이고 전문 교정 전문가이다. 모든 분야에 박학다식하다. 문장은 복사해서 입력으로 들어올 수도 있고, 다양한 포맷의 첨부가 들어올 수도 있다. 전체적인 맥락을 살펴보면서, 하나의 문장 단위로 반복해서 처리하고 교정된 문장에 대해, 원문, 교정, 교정된 이유에 대해, 다음의 형식으로 출력해줘.[원문] : '' [교정] : '' [교정된 이유] : ''"},
         {"role": "user", "content": text}
     ]
 
-    response = client.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model=model,
         messages=conversation_history
     )
 
-    return response.choices[0].message['content']
+    return response.choices[0].message.content
 
 def extract_corrections(text):
     corrections = []
@@ -63,7 +61,7 @@ st.title("첨삭 서비스 with ChatGPT")
 uploaded_file = st.file_uploader("파일 업로드", type=['pdf', 'txt'])
 model_list = load_model_list("models.txt")
 selected_model = st.selectbox("모델 선택", model_list)
-openai_key = st.text_input('OpenAI API Key', type="password")
+openai.api_key = st.text_input('OpenAI API Key', type="password")
 
 if selected_model == "gpt-3.5-turbo":
     sentence_split_count = st.number_input("문장 분할 단위 선택 (기본값: 2)", min_value=1, value=2)
@@ -84,7 +82,7 @@ if uploaded_file is not None:
 
     if selected_model != "gpt-3.5-turbo":
         if processing_choice == "전체 텍스트":
-            corrected_text = correct_text_with_gpt_full_text(file_content, selected_model, openai_key)
+            corrected_text = correct_text_with_gpt_full_text(file_content, selected_model)
             extracted_corrections = extract_corrections(corrected_text)
             all_corrections.extend(extracted_corrections)
             st.write("처리된 텍스트:")
@@ -97,7 +95,7 @@ if uploaded_file is not None:
             for i in range(0, len(sentences), sentence_split_count):
                 batch = sentences[i:i+sentence_split_count]
                 combined_sentence = ' '.join(batch)
-                corrected_text = correct_text_with_gpt_full_text(combined_sentence, selected_model, openai_key)
+                corrected_text = correct_text_with_gpt_full_text(combined_sentence, selected_model)
                 extracted_corrections = extract_corrections(corrected_text)
                 all_corrections.extend(extracted_corrections)
                 st.write("처리된 텍스트:")
@@ -111,7 +109,7 @@ if uploaded_file is not None:
         for i in range(0, len(sentences), sentence_split_count):
             batch = sentences[i:i+sentence_split_count]
             combined_sentence = ' '.join(batch)
-            corrected_text = correct_text_with_gpt_full_text(combined_sentence, selected_model, openai_key)
+            corrected_text = correct_text_with_gpt_full_text(combined_sentence, selected_model)
             extracted_corrections = extract_corrections(corrected_text)
             all_corrections.extend(extracted_corrections)
             st.write("처리된 텍스트:")
