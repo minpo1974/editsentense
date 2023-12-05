@@ -62,11 +62,15 @@ def correct_text_with_gpt_full_text(text, model, prompt):
 
 def extract_corrections(text):
     corrections = []
-    lines = text.split('\n')
-    for line in lines:
-        if '[교정] :' in line:
-            correction = line.split('[교정] :')[1].split('[')[0].strip()
-            corrections.append(correction)
+    if text is not None or text != "" :
+        lines = text.split('\n')
+        for line in lines:
+            if '[교정] :' in line:
+                correction = line.split('[교정] :')[1].split('[')[0].strip()
+                corrections.append(correction)
+    else :
+        corrections.append("교정된 내용이 없습니다.(None or "")")
+
     return corrections
 
 default_prompt = "너는 이제 첨삭 전문가이다. 너는 언어학자이고 전문 교정 전문가이다. 모든 분야에 박학다식하다. 문장은 복사해서 입력으로 들어올 수도 있고, 다양한 포맷의 첨부가 들어올 수도 있다. 전체적인 맥락을 살펴보면서, 하나의 문장 단위로 반복해서 처리하고 교정된 문장에 대해, 원문, 교정, 교정된 이유에 대해, 다음의 형식으로 출력해줘.[원문] : '' [교정] : '' [교정된 이유] : ''"
