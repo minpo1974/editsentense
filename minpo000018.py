@@ -53,6 +53,9 @@ def correct_text_with_gpt_full_text(text, model, api_key, user_prompt, sentence_
     #    api_key=api_key
    # )
     # OpenAI ChatGPT를 사용하여 첨삭 수행
+    # Ensure API key is being passed
+    #st.write("Using API Key:", api_key)  # For debugging, remove in production
+    openai.api_key = api_key
     try:
         #response = openai.ChatCompletion.create(
         response = openai.chat.completions.create(
