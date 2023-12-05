@@ -60,8 +60,7 @@ def correct_text_with_gpt_full_text(text, model, api_key, user_prompt, sentence_
         #response = openai.ChatCompletion.create(
         response = openai.chat.completions.create(
             model=model,
-            messages=conversation_history,
-            api_key=api_key
+            messages=conversation_history
         )
         corrected_text = response.choices[0].message['content']
     except Exception as e:
