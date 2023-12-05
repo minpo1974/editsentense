@@ -62,7 +62,8 @@ def correct_text_with_gpt_full_text(text, model, api_key, user_prompt, sentence_
             model=model,
             messages=conversation_history
         )
-        corrected_text = response.choices[0].message['content']
+        #corrected_text = response.choices[0].message['content']
+        corrected_text = response.choices[0].message.content
     except Exception as e:
         st.error(f"An error occurred with the OpenAI API call: {e}")
         corrected_text = ""
