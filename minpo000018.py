@@ -52,26 +52,23 @@ def correct_text_with_gpt_full_text(text, model, api_key, user_prompt, sentence_
     #    messages=conversation_history,
     #    api_key=api_key
    # )
-    try :
-        response = openai.chat.completions.create(
+    # OpenAI ChatGPT를 사용하여 첨삭 수행
+    try:
+        response = openai.ChatCompletion.create(
             model=model,
             messages=conversation_history,
-            timeout=120
+            api_key=api_key
         )
-        return response.choices[0].message.content
-    except openai.APIConnectionError as e:
-        print(f"API 연결 오류: {e}")
-        return None
-    except openai.OpenAIError as e:
-        print(f"OpenAI 에러: {e}")
-        return None    
+        corrected_text = response.choices[0].message['content']
     except Exception as e:
-        print(f"예상치 못한 오류: {e}")
-        return None
+        st.error(f"An error occurred with the OpenAI API call: {e}")
+        corrected_text = ""
+
+    return corrected_text
         
 
     # 첨삭된 결과 반환
-    return response.choices[0].message['content']
+    #return response.choices[0].message['content']
 
 # '[교정] :' 부분을 찾아서 해당 내용만 모으는 함수
 def extract_corrections(text):
@@ -123,36 +120,38 @@ if uploaded_file is not None and openai_key:
             batch = sentences[i:i+sentence_count]
             combined_sentence = ' '.join(batch)
             corrected_text = correct_text_with_gpt_full_text(combined_sentence, selected_model, openai_key, user_prompt, sentence_count)
-            
-            # 교정된 부분만 추출하여 저장
-            extracted_corrections = extract_corrections(corrected_text)
-            all_corrections.extend(extracted_corrections)
-            
-            # 현재 단계의 교정 내용 출력
-            st.write("처리된 텍스트:")
-            st.write(corrected_text)
-            st.write("교정된 내용:")
-            for correction in extracted_corrections:
-                st.write(correction)
-            st.write("---")
+            if corrected_text:
+                extracted_corrections = extract_corrections(corrected_text)
+                all_corrections.extend(extracted_corrections)            
+                # 현재 단계의 교정 내용 출력
+                st.write("처리된 텍스트:")
+                st.write(corrected_text)
+                st.write("교정된 내용:")
+                for correction in extracted_corrections:
+                    st.write(correction)
+                st.write("---")
+            else:
+                st.write("No corrected text was returned from the API.")
+                break
     else:
         # gpt-3.5-turbo 모델을 사용하는 경우의 로직
         for i in range(0, len(sentences), sentence_count):
             batch = sentences[i:i+sentence_count]
             combined_sentence = ' '.join(batch)
             corrected_text = correct_text_with_gpt_full_text(combined_sentence, selected_model, openai_key, user_prompt, sentence_count)
-            
-            # 교정된 부분만 추출하여 저장
-            extracted_corrections = extract_corrections(corrected_text)
-            all_corrections.extend(extracted_corrections)
-            
-            # 현재 단계의 교정 내용 출력
-            st.write("처리된 텍스트:")
-            st.write(corrected_text)
-            st.write("교정된 내용:")
-            for correction in extracted_corrections:
-                st.write(correction)
-            st.write("---")
+            if corrected_text:
+                extracted_corrections = extract_corrections(corrected_text)
+                all_corrections.extend(extracted_corrections)            
+                # 현재 단계의 교정 내용 출력
+                st.write("처리된 텍스트:")
+                st.write(corrected_text)
+                st.write("교정된 내용:")
+                for correction in extracted_corrections:
+                    st.write(correction)
+                st.write("---")
+            else:
+                st.write("No corrected text was returned from the API.")
+                break
 
 # 모든 처리가 완료된 후 교정된 내용 출력
 st.write("모든 교정된 내용:")
