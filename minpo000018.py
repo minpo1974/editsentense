@@ -42,13 +42,22 @@ def correct_text_with_gpt_full_text(text, model, prompt):
         {"role": "user", "content": text}
     ]
 
-    response = openai.chat.completions.create(
-        model=model,
-        messages=conversation_history
-    )
-
-    return response.choices[0].message.content
-
+    try :
+        response = openai.chat.completions.create(
+            model=model,
+            messages=conversation_history,
+            timeout=120
+        )
+        return response.choices[0].message.content
+    except openai.error.APIConnectionError as e:
+        print(f"API 연결 오류: {e}")
+        return None
+    except openai.error.OpenAIError as e:
+        print(f"OpenAI 에러: {e}")
+        return None    
+    except Exception as e:
+        print(f"예상치 못한 오류: {e}")
+        return None
 
 
 def extract_corrections(text):
