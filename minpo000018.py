@@ -49,10 +49,10 @@ def correct_text_with_gpt_full_text(text, model, prompt):
             timeout=120
         )
         return response.choices[0].message.content
-    except openai.error.APIConnectionError as e:
+    except openai.APIConnectionError as e:
         print(f"API 연결 오류: {e}")
         return None
-    except openai.error.OpenAIError as e:
+    except openai.OpenAIError as e:
         print(f"OpenAI 에러: {e}")
         return None    
     except Exception as e:
