@@ -54,7 +54,8 @@ def correct_text_with_gpt_full_text(text, model, api_key, user_prompt, sentence_
    # )
     # OpenAI ChatGPT를 사용하여 첨삭 수행
     try:
-        response = openai.ChatCompletion.create(
+        #response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model=model,
             messages=conversation_history,
             api_key=api_key
